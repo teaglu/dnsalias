@@ -154,7 +154,7 @@ public class DnsJavaProcessor implements Processor {
 				
 				lastDestinations= destinations;
 				
-				log.info("Retrieved initial set of " + setToString(destinations));
+				log.debug("Retrieved initial set of " + setToString(destinations));
 			} catch (IOException e) {
 				throw new UpdateException("IO Error retrieving DNS record", e);
 			} catch (DnsException e) {
@@ -180,7 +180,7 @@ public class DnsJavaProcessor implements Processor {
 
 				// Null nameservers in the alias record means to use the system ones
 				if (nameservers == null) {
-					log.info("Looking up " + sourceName + " using default nameservers");
+					log.debug("Looking up " + sourceName + " using default nameservers");
 					
 					Message queryMessage= Message.newQuery(queryRecord);
 					
@@ -217,7 +217,7 @@ public class DnsJavaProcessor implements Processor {
 						@SuppressWarnings("null")
 						String nameserver= nameserverIter.next();
 						
-						log.info("Looking up " + sourceName + " using nameserver " + nameserver);
+						log.debug("Looking up " + sourceName + " using nameserver " + nameserver);
 						
 						Message queryMessage= Message.newQuery(queryRecord);
 						try {
@@ -267,7 +267,7 @@ public class DnsJavaProcessor implements Processor {
 
 		if (!noChange) {
 			if (!destinations.isEmpty()) {
-				log.info("Targets: " + setToString(destinations));
+				log.debug("Targets: " + setToString(destinations));
 				
 				try {
 					DnsZone zone= provider.getZone(alias.getDestinationZone());
@@ -301,11 +301,15 @@ public class DnsJavaProcessor implements Processor {
 			}
 
 			StringBuilder messageBuild= new StringBuilder();
-			messageBuild.append("The DNS source for ");
-			messageBuild.append(alias.getDestinationName());
-			messageBuild.append(" in zone ");
+			messageBuild.append("The DNS resolution for [");
+			if (alias.getDestinationName().isBlank()) {
+				messageBuild.append("@");
+			} else {
+				messageBuild.append(alias.getDestinationName());
+			}
+			messageBuild.append("] in zone [");
 			messageBuild.append(alias.getDestinationZone());
-			messageBuild.append(" has changed from [");
+			messageBuild.append("] has been updated from [");
 			if (lastDestinations == null) {
 				messageBuild.append("UNKNOWN");
 			} else {
