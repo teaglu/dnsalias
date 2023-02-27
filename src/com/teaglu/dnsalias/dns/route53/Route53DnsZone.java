@@ -74,8 +74,12 @@ public class Route53DnsZone implements DnsZone {
 			@NonNull DnsRecordType type) throws DnsException, IOException
 	{
 		List<@NonNull DnsRecord> rval= new ArrayList<>(4);
-		
+
 		String searchName= name + "." + canonicalRoot;
+		if (name.isBlank() || name.equals("@")) {
+			searchName= canonicalRoot;
+		}
+		
 		RRType searchType= RRType.valueOf(type.toString());
 
 		ListResourceRecordSetsRequest searchRequest= ListResourceRecordSetsRequest.builder()
@@ -122,7 +126,12 @@ public class Route53DnsZone implements DnsZone {
 			@NonNull DnsRecord record,
 			boolean overwrite) throws DnsException
 	{
-		String searchName= record.getName() + "." + canonicalRoot;
+		String name= record.getName();
+		String searchName= name + "." + canonicalRoot;
+		if (name.isBlank() || name.equals("@")) {
+			searchName= canonicalRoot;
+		}
+		
 		RRType searchType= RRType.valueOf(record.getType().toString());
 		
 		Integer ttl= record.getPositiveTtl();
@@ -213,7 +222,7 @@ public class Route53DnsZone implements DnsZone {
 			if (!updateFound) {
 				ResourceRecordSet.Builder resourceRecordSetBuilder= ResourceRecordSet.builder();
 				
-				resourceRecordSetBuilder.name(record.getName() + "." + canonicalRoot);
+				resourceRecordSetBuilder.name(searchName);
 				resourceRecordSetBuilder.type(record.getType().toString());
 				resourceRecordSetBuilder.ttl((long)ttl);
 				resourceRecordSetBuilder.resourceRecords(resourceRecords);
@@ -277,6 +286,10 @@ public class Route53DnsZone implements DnsZone {
 			@NonNull DnsRecordType type) throws DnsException, IOException
 	{
 		String searchName= name + "." + canonicalRoot;
+		if (name.isBlank() || name.equals("@")) {
+			searchName= canonicalRoot;
+		}
+		
 		RRType searchType= RRType.valueOf(type.toString());
 		
 		boolean deleted= false;
