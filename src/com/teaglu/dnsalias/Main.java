@@ -28,10 +28,14 @@ import com.teaglu.dnsalias.scheduler.impl.ExecutorScheduler;
  *
  */
 public class Main {
+	private static final String VERSION= "0.0.4";
+	
     private static final Logger log= LoggerFactory.getLogger(Main.class);
     private static final CountDownLatch quitLatch= new CountDownLatch(1);
     
     public static void main(String args[]) {
+		log.info("DNS Alias Version " + VERSION + " Starting");
+    	
     	Scheduler scheduler= ExecutorScheduler.Create();
     	scheduler.start();
     	
