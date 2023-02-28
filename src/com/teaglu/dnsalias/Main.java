@@ -3,6 +3,9 @@
  */
 package com.teaglu.dnsalias;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -28,13 +31,11 @@ import com.teaglu.dnsalias.scheduler.impl.ExecutorScheduler;
  *
  */
 public class Main {
-	private static final String VERSION= "0.0.5";
-	
     private static final Logger log= LoggerFactory.getLogger(Main.class);
     private static final CountDownLatch quitLatch= new CountDownLatch(1);
     
     public static void main(String args[]) {
-		log.info("DNS Alias Version " + VERSION + " Starting");
+		log.info("DNS Alias Version " + getVersion() + " Starting");
     	
     	Scheduler scheduler= ExecutorScheduler.Create();
     	scheduler.start();
@@ -85,5 +86,23 @@ public class Main {
         if (scheduler != null) {
         	scheduler.stop();
         }
+    }
+    
+    private static @NonNull String getVersion() {
+    	String version= null;
+    	
+    	ClassLoader classLoader= Main.class.getClassLoader();
+    	
+    	final Properties properties= new Properties();
+    	try (InputStream stream= classLoader.getResourceAsStream("version.properties")) {
+    		properties.load(stream);
+    		version= properties.getProperty("version");
+    	} catch (IOException ioException) {
+    		log.error(
+    				"Unable to read version from properties file",
+    				ioException);
+    	}
+    	
+    	return (version != null) ? version : "UNKNOWN";
     }
 }

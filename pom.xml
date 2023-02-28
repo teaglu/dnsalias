@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.teaglu</groupId>
 	<artifactId>dnsalias</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
 	<name>DNS Alias</name>
 	
 	<properties>
@@ -47,8 +47,13 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/com/teaglu/dnsalias/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
 	<dependencies>
