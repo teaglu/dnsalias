@@ -121,7 +121,7 @@ public class DnsJavaProcessor implements Processor {
 	private String setToString(Set<@NonNull Inet4Address> destinations) {
 		StringBuilder destinationList= new StringBuilder();
 		for (Inet4Address address : destinations) {
-			if (!destinationList.isEmpty()) {
+			if (destinationList.length() > 0) {
 				destinationList.append(", ");
 			}
 			destinationList.append(address.getHostAddress());
