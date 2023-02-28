@@ -4,8 +4,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.eclipse.jdt.annotation.NonNull;
-
 import com.teaglu.composite.Composite;
+import com.teaglu.composite.exception.MissingValueException;
+import com.teaglu.composite.exception.RangeException;
 import com.teaglu.composite.exception.SchemaException;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -28,48 +29,62 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  *
  */
 public class AwsConnectionImpl implements AwsConnection {
-	private @NonNull String description;
-	
+	// Region to operate in
 	private Region region;
 	
+	// Access and secret key for credentials
 	private String accessKey;
 	private String secretKey;
-	private String assumeRole;
-	int assumeRoleSeconds;
 	
-	@Override
-	public @NonNull String getDescription() { return description; }
+	// Role to assume for operations
+	private String assumeRole;
+	
+	// How many seconds to assume the role
+	private int assumeRoleSeconds;
+	
+	// Zone objects aren't meant to be stored long term, and are bound to the client object
+	// they were created with.  This is how many milliseconds of slack we give ourselves for
+	// operations before creating a new STS session to be safe.
+	private static final long ASSUME_ROLE_SLACK= 300_000;
 	
 	public AwsConnectionImpl(
 			@NonNull String name,
 			@NonNull Composite spec) throws SchemaException
 	{
-		String tmpDescription= spec.getOptionalString("description");
-		if (tmpDescription == null) {
-			tmpDescription= name;
-		}
-		this.description= tmpDescription;
-		
+		// You would think this would blow up if you put in us-central-8 or something,
+		// but I don't think that's compiled in which sort of makes sense.  From what I
+		// remember you just get weird DNS errors.
 		this.region= Region.of(spec.getRequiredString("region"));
 		
-		String tmpAccessKey= spec.getOptionalString("accessKey");
-		String tmpSecretKey= spec.getOptionalString("secretKey");
-		
-		accessKey= tmpAccessKey;
-		secretKey= tmpSecretKey;
+		accessKey= spec.getOptionalString("accessKey");
+		secretKey= spec.getOptionalString("secretKey");
+
+		// Better to give a message on config than to do something confusing
+		if ((accessKey != null) && (secretKey == null)) {
+			throw new MissingValueException("secretKey");
+		}
+		if ((secretKey != null) && (accessKey == null)) {
+			throw new MissingValueException("acessKey");
+		}
 		
 		assumeRole= spec.getOptionalString("assumeRole");
 		
 		Integer assumeRoleMinutes= spec.getOptionalInteger("assumeRoleMinutes");
 		if (assumeRoleMinutes == null) {
 			assumeRoleMinutes= 60;
+		} else if (assumeRoleMinutes < 15) {
+			// AWS limits this to 15 minutes for some reason
+			throw new RangeException("Assume role minutes is limited by AWS to >= 15 minutes");
 		}
 		
 		assumeRoleSeconds= assumeRoleMinutes * 60;
 	}
 
-	
+	// Saved credentials so we don't create STS sessions over and over
 	private AwsCredentialsProvider savedCredentialsProvider= null;
+
+	// This is the system time when the saved credentials expire
+	private long savedCredentialsExpire= 0;
 	
 	/**
 	 * getCredentialsProvider
@@ -79,9 +94,22 @@ public class AwsConnectionImpl implements AwsConnection {
 	 * @return							Credentials structure
 	 */
 	private @NonNull AwsCredentialsProvider getCredentialsProvider() {
+		if (savedCredentialsProvider != null) {
+			if (savedCredentialsExpire > 0) {
+				if (System.currentTimeMillis() > savedCredentialsExpire) {
+					savedCredentialsProvider= null;
+				}
+			}
+		}
+		
 		// Return the saved credential if present - assuming a role can take a while
 		AwsCredentialsProvider credentialsProvider= savedCredentialsProvider;
+		
 		if (credentialsProvider == null) {
+			// I'm not sure exactly when the clock starts on the STS role, so assume it starts
+			// before we ask to be on the safe side.
+			long credentialsStart= System.currentTimeMillis();
+			
 			if ((accessKey != null) && (secretKey != null)) {
 				// If we got an access key / secret key use that.  This is needed if we're not
 				// running inside an AWS environment.
@@ -103,7 +131,7 @@ public class AwsConnectionImpl implements AwsConnection {
 				AssumeRoleRequest assumeRoleRequest= AssumeRoleRequest.builder()
 						.durationSeconds(assumeRoleSeconds)
 						.roleArn(assumeRole)
-						.roleSessionName("SMBTrack-EventD")
+						.roleSessionName("DNS-Alias")
 						.build();
 				
 				AssumeRoleResponse assumeRoleResponse= stsClient.assumeRole(assumeRoleRequest);
@@ -115,6 +143,12 @@ public class AwsConnectionImpl implements AwsConnection {
 						assumedCredentials.sessionToken());
 				
 				credentialsProvider= StaticCredentialsProvider.create(sessionCredentials);
+				
+				// Record when the role expires, so that if someone asks for credentials again
+				// after the expire time we'll regenerate everything.  Otherwise someone can
+				// get an error because the STS session expired
+				savedCredentialsExpire= credentialsStart +
+						(assumeRoleSeconds * 1000) - ASSUME_ROLE_SLACK;
 			}
 			
 			if (credentialsProvider == null) {

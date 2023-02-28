@@ -12,15 +12,6 @@ import software.amazon.awssdk.services.route53.Route53Client;
  */
 public interface AwsConnection {
 	/**
-	 * getDescription
-	 * 
-	 * Get a printable description for this connection
-	 * 
-	 * @return							Description
-	 */
-	public @NonNull String getDescription();
-	
-	/**
 	 * buildRoute53Client
 	 * 
 	 * Build a new Route53 client

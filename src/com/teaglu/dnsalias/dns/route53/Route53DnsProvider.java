@@ -34,14 +34,12 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
  */
 public class Route53DnsProvider implements DnsProvider {
 	private @NonNull AwsConnection connection;
-	private @NonNull Route53Client client;
 	
 	private Route53DnsProvider(
 			@NonNull Composite config,
 			@NonNull SecretProvider secretProvider) throws SchemaException, ConfigException
 	{
 		connection= new AwsConnectionImpl("route53", config);
-		client= connection.buildRoute53Client();
 	}
 	
 	public static @NonNull DnsProvider Create(
@@ -56,13 +54,15 @@ public class Route53DnsProvider implements DnsProvider {
 			@NonNull String name) throws DnsException, IOException
 	{
 		try {
+			Route53Client client= connection.buildRoute53Client();
+			
 			// Convert to canonical form with dot on end
 			String canonicalRoot= name;
 			if (!canonicalRoot.endsWith(".")) {
 				canonicalRoot= canonicalRoot + ".";
 			}
 			
-			String hostedZoneId= getHostedZoneId(canonicalRoot);
+			String hostedZoneId= getHostedZoneId(client, canonicalRoot);
 			int negativeTtl= getNegativeTtl(hostedZoneId, name);
 			
 			return new Route53DnsZone(client,
@@ -73,6 +73,7 @@ public class Route53DnsProvider implements DnsProvider {
 	}
 	
 	private @NonNull String getHostedZoneId(
+			@NonNull Route53Client client,
 			@NonNull String canonicalRoot) throws DnsException
 	{
 		String hostedZoneId= null;
@@ -117,6 +118,8 @@ public class Route53DnsProvider implements DnsProvider {
 		int ttl= 0;
 		
 		try {
+			Route53Client client= connection.buildRoute53Client();
+			
 			ListResourceRecordSetsRequest soaRequest= ListResourceRecordSetsRequest.builder()
 					.hostedZoneId(hostedZoneId)
 					.startRecordName(".")
