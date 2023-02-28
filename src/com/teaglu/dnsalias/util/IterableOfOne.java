@@ -4,6 +4,13 @@ import java.util.Iterator;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+/**
+ * IterableOfOne
+ * 
+ * Utility class to create an iterable of some type that just has one thing.
+ *
+ * @param <T>
+ */
 public class IterableOfOne<T> implements Iterable<@NonNull T> {
 	private @NonNull T value;
 	

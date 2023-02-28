@@ -27,10 +27,20 @@ import com.teaglu.dnsalias.alert.impl.SmtpAlertSink;
 /**
  * AlertSinkFactory
  *
- * Static factory to build alert sinks
+ * Factory to build alert sinks
  */
 public final class AlertSinkFactory {
-	public static @NonNull AlertSink Create(
+	private static class InstanceHolder {
+		private static @NonNull AlertSinkFactory INSTANCE= new AlertSinkFactory();
+	}
+	
+	public static @NonNull AlertSinkFactory getInstance() {
+		return InstanceHolder.INSTANCE;
+	}
+	
+	private AlertSinkFactory() {}
+	
+	public @NonNull AlertSink create(
 			@NonNull Composite spec) throws SchemaException
 	{
 		String type= spec.getRequiredString("type");

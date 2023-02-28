@@ -28,7 +28,9 @@ public class OptionDnsProvider implements DnsProvider {
 		Iterable<@NonNull Composite> providerSpecs= spec.getRequiredObjectArray("options");
 		
 		for (Composite providerSpec : providerSpecs) {
-			DnsProvider provider= DnsProviderFactory.Create(providerSpec, secretProvider);
+			DnsProvider provider= DnsProviderFactory.
+					getInstance().
+					create(providerSpec, secretProvider);
 			
 			Iterable<@NonNull String> zones= providerSpec.getOptionalStringArray("zones");
 			if (zones == null) {

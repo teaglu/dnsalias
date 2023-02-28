@@ -57,9 +57,32 @@ role.
 If the key `assumeRole` is present, then after credentials are established the named role will
 be assumed using the STS API.
 
+The following example provider sections defines one provider named `client1` that accesses AWS
+using an access key / secret key combination, then assumes a role to access another account:
+
+    "providers": {
+        "client1": {
+            "type": "route53",
+            "accessKey": "234lkjlkjasdf",
+            "secretKey": "a23lk4jlasdkjf2lkqj345lkqj2345lkj",
+            "assumeRole": "arn:aws:iam::123456789012:role/client-admin"
+        }
+    }
+
 #### CloudFlare Provider
 
-FIXME
+The Cloudflare provider has a single key `apiToken` that should match an API token generated
+from the Cloudflare management console.
+
+The following example provider section defines one provider named `client2` that accesses
+a Cloudflare account:
+
+    "providers": {
+        "client2": {
+            "type": "cloudflare",
+            "apiToken": "asldkjfwlkjarlkeja"
+        }
+    }
 
 ### Aliases Section
 
@@ -93,4 +116,49 @@ updated, and the `name` property should be set to the relative name to be update
 If the string property `zone` is not present, then the product will assume that the zone to
 be updated is the one immediately containing the name, and the name will be interpreted as the
 single segment to be updated.
+
+## Example Full Configuration File in JSON
+
+The example configuration is for an example domain hosted in Digital Ocean, but where the DNS
+records are controlled by IT operations in an AWS account using Route53.  The job monitors the A
+addresses reported by the Digigal Ocean nameservers, and replicates the apex record to the
+apex of the Route53 zone.
+
+Since the job is running as a container in ECS, it can be given a role that has the necessary
+permissions to update DNS records.
+
+    {
+        "alerts": {
+            "type": "smtp",
+            "host": "smtp.contoso.com",
+            "username": "dnsalias",
+            "password": "hunter2",
+            "from": "DNS Alias Job <dnsalias@contoso.com>",
+            "to": [
+                "Super User <suser@contoso.com>"
+            ]
+        },
+        "providers": {
+            "client1": {
+                "type": "route53",
+                "region": "us-east-1"
+            }
+        },
+        "aliases": {
+            "client1-apex": {
+                "source": {
+                    "name": "contoso.com",
+                    "servers": [
+                        "ns1.digitalocean.com",
+                        "ns2.digitalocean.com"
+                    ]
+                },
+                "destination": {
+                    "name": "",
+                    "zone": "contoso.com"
+                },
+                "provider": "client1"
+            }
+        }
+    }
 

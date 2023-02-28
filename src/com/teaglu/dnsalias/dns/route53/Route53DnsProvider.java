@@ -26,6 +26,12 @@ import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
+/**
+ * Route53DnsProvider
+ * 
+ * Implementation of DnsProvider for AWS Route53
+ *
+ */
 public class Route53DnsProvider implements DnsProvider {
 	private @NonNull AwsConnection connection;
 	private @NonNull Route53Client client;

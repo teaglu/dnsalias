@@ -32,8 +32,8 @@ import com.teaglu.dnsalias.dns.DnsZone;
 import com.teaglu.dnsalias.dns.exception.DnsException;
 import com.teaglu.dnsalias.dns.record.ARecord;
 import com.teaglu.dnsalias.processor.Processor;
-import com.teaglu.dnsalias.processor.exception.LookupException;
-import com.teaglu.dnsalias.processor.exception.UpdateException;
+import com.teaglu.dnsalias.processor.exception.SourceException;
+import com.teaglu.dnsalias.processor.exception.DestinationException;
 
 /**
  * DnsJavaProcessor
@@ -77,7 +77,11 @@ public class DnsJavaProcessor implements Processor {
 			builder.append(name);
 		}
 		builder.append("]->(");
-		builder.append(alias.getDestinationName());
+		if (alias.getDestinationName().isBlank()) {
+			builder.append("@");
+		} else {
+			builder.append(alias.getDestinationName());
+		}
 		builder.append(",");
 		builder.append(alias.getDestinationZone());
 		builder.append("))");
@@ -128,7 +132,7 @@ public class DnsJavaProcessor implements Processor {
 	
 	@Override
 	public long process(
-			@NonNull AlertSink alertSink) throws LookupException, UpdateException
+			@NonNull AlertSink alertSink) throws SourceException, DestinationException
 	{
 		if (lastDestinations == null) {
 			try {
@@ -136,7 +140,7 @@ public class DnsJavaProcessor implements Processor {
 				
 				DnsZone zone= provider.getZone(alias.getDestinationZone());
 				if (zone == null) {
-					throw new UpdateException(
+					throw new DestinationException(
 							"The destination zone could not be located by the update API");
 				}
 
@@ -156,9 +160,9 @@ public class DnsJavaProcessor implements Processor {
 				
 				log.debug("Retrieved initial set of " + setToString(destinations));
 			} catch (IOException e) {
-				throw new UpdateException("IO Error retrieving DNS record", e);
+				throw new DestinationException("IO Error retrieving DNS record", e);
 			} catch (DnsException e) {
-				throw new UpdateException("Error retrieving DNS record", e);
+				throw new DestinationException("Error retrieving DNS record", e);
 			}
 		}
 		
@@ -204,7 +208,7 @@ public class DnsJavaProcessor implements Processor {
 							}
 						}
 					} catch (IOException lookupException) {
-						throw new LookupException(
+						throw new SourceException(
 								"Unable to resolve [" + lookupName + "] with system resolver.",
 								lookupException);
 					}
@@ -247,7 +251,7 @@ public class DnsJavaProcessor implements Processor {
 					}
 					
 					if (!anySuccess) {
-						throw new LookupException(
+						throw new SourceException(
 								"Unable to resolve [" + lookupName + "] with any listed " +
 								"resolver.  The exception attached is the last.",
 								lastException);
@@ -255,7 +259,7 @@ public class DnsJavaProcessor implements Processor {
 				}
 			}
 		} catch (TextParseException e) {
-			throw new LookupException("Error parsing text on DNS lookup", e);
+			throw new SourceException("Error parsing text on DNS lookup", e);
 		}
 		
 		boolean noChange= false;
@@ -272,7 +276,7 @@ public class DnsJavaProcessor implements Processor {
 				try {
 					DnsZone zone= provider.getZone(alias.getDestinationZone());
 					if (zone == null) {
-						throw new UpdateException(
+						throw new DestinationException(
 								"The destination zone could not be located by the update API");
 					}
 	
@@ -280,23 +284,23 @@ public class DnsJavaProcessor implements Processor {
 							alias.getDestinationName(), destinations, (int)lowestTtl),
 							true);
 				} catch (IOException e) {
-					throw new UpdateException("IO Error updating DNS record", e);
+					throw new DestinationException("IO Error updating DNS record", e);
 				} catch (DnsException e) {
-					throw new UpdateException("Error updating DNS record", e);
+					throw new DestinationException("Error updating DNS record", e);
 				}
 			} else {
 				try {
 					DnsZone zone= provider.getZone(alias.getDestinationZone());
 					if (zone == null) {
-						throw new UpdateException(
+						throw new DestinationException(
 								"The destination zone could not be located by the update API");
 					}
 	
 					zone.deleteRecord(alias.getDestinationName(), DnsRecordType.A);
 				} catch (IOException e) {
-					throw new UpdateException("IO Error updating DNS record", e);
+					throw new DestinationException("IO Error updating DNS record", e);
 				} catch (DnsException e) {
-					throw new UpdateException("Error updating DNS record", e);
+					throw new DestinationException("Error updating DNS record", e);
 				}
 			}
 

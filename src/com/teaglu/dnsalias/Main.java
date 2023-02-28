@@ -19,12 +19,20 @@ import com.teaglu.configure.secret.replacer.AtIdSecretReplacer;
 import com.teaglu.dnsalias.scheduler.Scheduler;
 import com.teaglu.dnsalias.scheduler.impl.ExecutorScheduler;
 
+/**
+ * Main
+ * 
+ * Contains the main entry point of the program.
+ * 
+ * At some point this may also contain the correct entrypoint to use this as an AWS lambda.
+ *
+ */
 public class Main {
     private static final Logger log= LoggerFactory.getLogger(Main.class);
     private static final CountDownLatch quitLatch= new CountDownLatch(1);
     
     public static void main(String args[]) {
-    	Scheduler scheduler= new ExecutorScheduler();
+    	Scheduler scheduler= ExecutorScheduler.Create();
     	scheduler.start();
     	
         try {

@@ -50,7 +50,7 @@ public class ConfigurableSinkProxy implements AlertSink {
 		AlertSink newSink= null;
 		
 		if (config != null) {
-			newSink= AlertSinkFactory.Create(config);
+			newSink= AlertSinkFactory.getInstance().create(config);
 		}
 		
 		synchronized (this) {

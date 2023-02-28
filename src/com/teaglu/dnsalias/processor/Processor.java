@@ -3,8 +3,8 @@ package com.teaglu.dnsalias.processor;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.teaglu.dnsalias.alert.AlertSink;
-import com.teaglu.dnsalias.processor.exception.LookupException;
-import com.teaglu.dnsalias.processor.exception.UpdateException;
+import com.teaglu.dnsalias.processor.exception.SourceException;
+import com.teaglu.dnsalias.processor.exception.DestinationException;
 
 /**
  * Processor
@@ -24,9 +24,9 @@ public interface Processor {
 	 * @param alertSink					A sink to send any relevant alerts
 	 * @return							How many seconds the processor should be re-called after
 	 * 
-	 * @throws LookupException			A problem occurred getting the source data
-	 * @throws UpdateException			A problem occurred updating the DNS provider
+	 * @throws SourceException			A problem occurred getting the source data
+	 * @throws DestinationException			A problem occurred updating the DNS provider
 	 */
 	public long process(
-			@NonNull AlertSink alertSink) throws LookupException, UpdateException;
+			@NonNull AlertSink alertSink) throws SourceException, DestinationException;
 }

@@ -1,5 +1,11 @@
 package com.teaglu.dnsalias.alert;
 
+/**
+ * AlertCategory
+ * 
+ * Category of alert to allow for filtering.
+ * 
+ */
 public enum AlertCategory {
 	// An exception occurred during configuration
 	CONFIGURATION_EXCEPTION,

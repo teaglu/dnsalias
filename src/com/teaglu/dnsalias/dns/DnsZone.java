@@ -5,7 +5,26 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.teaglu.dnsalias.dns.exception.DnsException;
 
+/**
+ * DnsZone
+ * 
+ * Representation of a DNS zone with operations
+ *
+ */
 public interface DnsZone {
+	/**
+	 * findRecords
+	 * 
+	 * Find all matching records by type and name
+	 * 
+	 * @param name						Name relative to zone, or "" or "@" to mean the apex
+	 * @param type						DNS record type
+	 * 
+	 * @return							List of records
+	 * 
+	 * @throws DnsException
+	 * @throws IOException
+	 */
 	public @NonNull Iterable<@NonNull DnsRecord> findRecords(
 			@NonNull String name,
 			@NonNull DnsRecordType type) throws DnsException, IOException;
@@ -13,11 +32,12 @@ public interface DnsZone {
 	/**
 	 * createRecord
 	 * 
-	 * Create a record in the DNS zone.  If the record has multiple values, all values should
-	 * be returned for a query to the name and type.  If other records exist with the same
-	 * name and type they should be left in place.
+	 * Create a record in the DNS zone.  If the overwrite parameter is true then this
+	 * will replace all values with the same name and type, otherwise the values will
+	 * be added as additional entries.
 	 * 
 	 * @param record					Record to create
+	 * @param overwrite					Replace all records with this one
 	 * 
 	 * @throws DnsException
 	 * @throws IOException

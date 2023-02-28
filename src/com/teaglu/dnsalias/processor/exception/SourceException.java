@@ -1,9 +1,9 @@
 package com.teaglu.dnsalias.processor.exception;
 
-public class LookupException extends Exception {
+public class SourceException extends Exception {
 	private static final long serialVersionUID = 1L;
 
-	public LookupException(String message, Throwable cause) {
+	public SourceException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

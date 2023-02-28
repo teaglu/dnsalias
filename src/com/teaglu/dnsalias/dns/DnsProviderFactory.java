@@ -11,8 +11,24 @@ import com.teaglu.dnsalias.dns.cloudflare.CloudflareDnsProvider;
 import com.teaglu.dnsalias.dns.option.OptionDnsProvider;
 import com.teaglu.dnsalias.dns.route53.Route53DnsProvider;
 
+/**
+ * DnsProviderFactory
+ * 
+ * Factory for DnsProvider instances using a composite as configuration.
+ * 
+ */
 public class DnsProviderFactory {
-	public static @NonNull DnsProvider Create(
+	private static class InstanceHolder {
+		private static final @NonNull DnsProviderFactory INSTANCE= new DnsProviderFactory();
+	}
+	
+	public static @NonNull DnsProviderFactory getInstance() {
+		return InstanceHolder.INSTANCE;
+	}
+	
+	private DnsProviderFactory() {}
+	
+	public @NonNull DnsProvider create(
 			@NonNull Composite config,
 			@NonNull SecretProvider secretProvider) throws SchemaException, ConfigException
 	{
