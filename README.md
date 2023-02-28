@@ -162,3 +162,23 @@ permissions to update DNS records.
         }
     }
 
+## Running the Program
+
+You pass the configuration source using the environment variables CONFIGURATION and SECRETS -
+the format of these is described in the [configure](https://github.com/teaglu/configure) page.  A
+basic string to point to a file is `debug://{path}`.  For example, the following string would
+work on a Linux system:
+
+    debug://etc/dnsalias/config.json
+    
+While the following string might work on a Windows system:
+
+    debug://C/Users/Rando/Desktop/dnsalias.json
+
+Any environment with a Java 11 or higher runtime can run the application from the command line
+with the following command:
+
+    java -jar dnsalias.jar
+    
+You may want to included additional arguments to limit the amount of memory used or otherwise
+tune the environment.
