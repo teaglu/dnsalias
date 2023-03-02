@@ -166,14 +166,14 @@ permissions to update DNS records.
 
 You pass the configuration source using the environment variables CONFIGURATION and SECRETS -
 the format of these is described in the [configure](https://github.com/teaglu/configure) page.  A
-basic string to point to a file is `debug://{path}`.  For example, the following string would
+basic string to point to a file is `file://{path}`.  For example, the following string would
 work on a Linux system:
 
-    debug://etc/dnsalias/config.json
+    file://etc/dnsalias/config.json
     
 While the following string might work on a Windows system:
 
-    debug://C/Users/Rando/Desktop/dnsalias.json
+    file://C/Users/Rando/Desktop/dnsalias.json
 
 Any environment with a Java 11 or higher runtime can run the application from the command line
 with the following command:
