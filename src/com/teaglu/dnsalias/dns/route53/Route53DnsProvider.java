@@ -39,7 +39,7 @@ public class Route53DnsProvider implements DnsProvider {
 			@NonNull Composite config,
 			@NonNull SecretProvider secretProvider) throws SchemaException, ConfigException
 	{
-		connection= new AwsConnectionImpl("route53", config);
+		connection= new AwsConnectionImpl("route53", config, secretProvider);
 	}
 	
 	public static @NonNull DnsProvider Create(

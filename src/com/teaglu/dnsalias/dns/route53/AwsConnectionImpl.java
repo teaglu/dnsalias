@@ -8,6 +8,10 @@ import com.teaglu.composite.Composite;
 import com.teaglu.composite.exception.MissingValueException;
 import com.teaglu.composite.exception.RangeException;
 import com.teaglu.composite.exception.SchemaException;
+import com.teaglu.configure.exception.ConfigException;
+import com.teaglu.configure.secret.SecretProvider;
+import com.teaglu.configure.secret.SecretReplacer;
+import com.teaglu.configure.secret.replacer.AtIdSecretReplacer;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -49,24 +53,41 @@ public class AwsConnectionImpl implements AwsConnection {
 	
 	public AwsConnectionImpl(
 			@NonNull String name,
-			@NonNull Composite spec) throws SchemaException
+			@NonNull Composite spec,
+			@NonNull SecretProvider secretProvider) throws SchemaException, ConfigException
 	{
 		// You would think this would blow up if you put in us-central-8 or something,
 		// but I don't think that's compiled in which sort of makes sense.  From what I
 		// remember you just get weird DNS errors.
 		this.region= Region.of(spec.getRequiredString("region"));
 		
-		accessKey= spec.getOptionalString("accessKey");
-		secretKey= spec.getOptionalString("secretKey");
+		String tmpAccessKey= spec.getOptionalString("accessKey");
+		String tmpSecretKey= spec.getOptionalString("secretKey");
 
 		// Better to give a message on config than to do something confusing
-		if ((accessKey != null) && (secretKey == null)) {
+		if ((tmpAccessKey != null) && (tmpSecretKey == null)) {
 			throw new MissingValueException("secretKey");
 		}
-		if ((secretKey != null) && (accessKey == null)) {
-			throw new MissingValueException("acessKey");
+		if ((tmpSecretKey != null) && (tmpAccessKey == null)) {
+			throw new MissingValueException("accessKey");
 		}
 		
+		if ((tmpAccessKey != null) && (tmpSecretKey != null)) {
+			SecretReplacer secretReplacer= AtIdSecretReplacer.Create(secretProvider);
+			if (tmpAccessKey != null) {
+				tmpAccessKey= secretReplacer.replace(tmpAccessKey);
+			}
+			if (tmpSecretKey != null) {
+				tmpSecretKey= secretReplacer.replace(tmpSecretKey);
+			}
+		}
+		
+		// We just used tmp variables because the compiler can't track nullability in
+		// class variables, because there might be another thread.
+		accessKey= tmpAccessKey;
+		secretKey= tmpSecretKey;
+		
+		// No reason for the role to be secret
 		assumeRole= spec.getOptionalString("assumeRole");
 		
 		Integer assumeRoleMinutes= spec.getOptionalInteger("assumeRoleMinutes");
