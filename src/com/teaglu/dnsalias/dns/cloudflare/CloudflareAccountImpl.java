@@ -17,7 +17,10 @@ import com.google.gson.JsonObject;
 import com.teaglu.composite.Composite;
 import com.teaglu.composite.exception.SchemaException;
 import com.teaglu.composite.json.JsonComposite;
+import com.teaglu.configure.exception.ConfigException;
 import com.teaglu.configure.secret.SecretProvider;
+import com.teaglu.configure.secret.SecretReplacer;
+import com.teaglu.configure.secret.replacer.AtIdSecretReplacer;
 import com.teaglu.dnsalias.dns.exception.DnsApiException;
 
 public class CloudflareAccountImpl implements CloudflareAccount {
@@ -25,9 +28,11 @@ public class CloudflareAccountImpl implements CloudflareAccount {
 	
 	CloudflareAccountImpl(
 			@NonNull Composite spec,
-			@NonNull SecretProvider secretProvider) throws SchemaException
+			@NonNull SecretProvider secretProvider) throws SchemaException, ConfigException
 	{
-		this.apiToken= spec.getRequiredString("apiToken");
+		SecretReplacer secretReplacer= AtIdSecretReplacer.Create(secretProvider);
+		
+		this.apiToken= secretReplacer.replace(spec.getRequiredString("apiToken"));
 	}
 	
 	@Override
