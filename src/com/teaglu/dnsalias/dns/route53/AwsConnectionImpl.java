@@ -16,7 +16,7 @@ import com.teaglu.configure.secret.replacer.AtIdSecretReplacer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sts.StsClient;
@@ -139,7 +139,8 @@ public class AwsConnectionImpl implements AwsConnection {
 			} else {
 				// Otherwise use the instance profile, which just picks up what we innately have
 				// because of the profile we're running under.
-				credentialsProvider= InstanceProfileCredentialsProvider.create();
+				//credentialsProvider= InstanceProfileCredentialsProvider.create();
+				credentialsProvider= DefaultCredentialsProvider.create();
 			}
 			
 			// If we have to assume a role we have to go through this whole dance.
