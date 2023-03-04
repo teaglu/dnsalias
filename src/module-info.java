@@ -21,4 +21,6 @@ module com.teaglu.dnsalias {
 	
 	// For sending alert emails
 	requires jakarta.mail;
+	requires aws.lambda.java.core;
+	requires com.google.gson;
 }

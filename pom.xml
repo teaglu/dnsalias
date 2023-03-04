@@ -1,18 +1,15 @@
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.teaglu</groupId>
 	<artifactId>dnsalias</artifactId>
-	<version>0.0.8</version>
+	<version>0.1.0</version>
 	<name>DNS Alias</name>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -75,11 +72,11 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>dnsjava</groupId>
-		    <artifactId>dnsjava</artifactId>
-		    <version>3.5.2</version>
+			<groupId>dnsjava</groupId>
+			<artifactId>dnsjava</artifactId>
+			<version>3.5.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>jakarta.activation</artifactId>
@@ -99,7 +96,7 @@
 		<dependency>
 			<groupId>com.teaglu</groupId>
 			<artifactId>com.teaglu.configure</artifactId>
-			<version>[1.1.0,2.0.0)</version>
+			<version>[1.2.0,2.0.0)</version>
 		</dependency>
 
 		<dependency>
@@ -126,6 +123,12 @@
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>route53</artifactId>
 			<version>[2.19.27,3.0.0)</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-core</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 	</dependencies>
 </project>

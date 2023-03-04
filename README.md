@@ -182,3 +182,30 @@ with the following command:
     
 You may want to included additional arguments to limit the amount of memory used or otherwise
 tune the environment.
+
+## Running as an AWS Lambda
+
+The program can be used as an AWS Lambda, typically triggered by a periodic EventBridge schedule.
+This solution will not respond as quickly as running the program continuously, since the built-in
+scheduler is designed to track the TTL of the source records.  It can however be useful to
+take advantage of the generous Lambda free tier.
+
+When used as an AWS Lambda function, the program will read the configuration from its input in
+JSON format, evaluate each alias exactly once, and return.  This allows you to create one Lambda
+function containing the program, and execute it from different EventBridge schedules to handle
+different tasks or clients.
+
+To use the program as a Lambda function:
+
+* Use the Java 11 (Corretto) runtime.
+* Choose either x86_64 or arm64 platform.
+* Specify `com.teaglu.dnsalias.Lambda` as the Handler.
+* Increase the execution timeout to 60 seconds or higher.
+
+The default execution timeout of 15 seconds may expire if the program fails to contact the first
+DNS server and has to move down the list.  Multiple aliases are evaluated in parallel, but a
+single alias is not.
+
+The SECRETS environment variable may still be specified to pass credentials separately, for
+example to reference AWS SecretsManager.
+
