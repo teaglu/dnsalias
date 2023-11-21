@@ -51,6 +51,8 @@ public class Main {
                 @Override
                 public void apply(@NonNull Composite config) throws Exception {
                     scheduler.configure(config, secretProvider);
+
+                    log.info("Configuration successfully applied");
                 }
 
                 @Override
@@ -91,12 +93,20 @@ public class Main {
     private static @NonNull String getVersion() {
     	String version= null;
     	
-    	ClassLoader classLoader= Main.class.getClassLoader();
-    	
+    	final ClassLoader classLoader= Main.class.getClassLoader();
     	final Properties properties= new Properties();
-    	try (InputStream stream= classLoader.getResourceAsStream("version.properties")) {
-    		properties.load(stream);
-    		version= properties.getProperty("version");
+    	
+    	try {
+    		final InputStream stream= classLoader.getResourceAsStream("version.properties");
+
+	    	if (stream != null) {
+	    		try {
+		    		properties.load(stream);
+		    		version= properties.getProperty("version");
+	    		} finally {
+	    			stream.close();
+	    		}
+	    	}
     	} catch (IOException ioException) {
     		log.error(
     				"Unable to read version from properties file",

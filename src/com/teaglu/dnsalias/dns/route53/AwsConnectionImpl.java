@@ -36,6 +36,8 @@ public class AwsConnectionImpl implements AwsConnection {
 	// Region to operate in
 	private Region region;
 	
+	private boolean endpointOverride= false;
+	
 	// Access and secret key for credentials
 	private String accessKey;
 	private String secretKey;
@@ -60,6 +62,11 @@ public class AwsConnectionImpl implements AwsConnection {
 		// but I don't think that's compiled in which sort of makes sense.  From what I
 		// remember you just get weird DNS errors.
 		this.region= Region.of(spec.getRequiredString("region"));
+		
+		// I don't remember why this was here, but I'm having weird API errors when running as
+		// an ECS service, so I'm making this configurable.  It doesn't seem to be necessary
+		// any more, so it might have been carried over from when we were using the V1 SDK.
+		this.endpointOverride= spec.getOptionalBoolean("endpointOverride", false);
 		
 		String tmpAccessKey= spec.getOptionalString("accessKey");
 		String tmpSecretKey= spec.getOptionalString("secretKey");
@@ -191,10 +198,11 @@ public class AwsConnectionImpl implements AwsConnection {
 		Route53ClientBuilder builder= Route53Client.builder();
 		
 		try {
-			URI endpoint= new URI("https://route53.amazonaws.com");
-			
 			builder.region(region);
-			builder.endpointOverride(endpoint);
+			if (endpointOverride) {
+				URI endpoint= new URI("https://route53.amazonaws.com");
+				builder.endpointOverride(endpoint);
+			}
 			builder.credentialsProvider(getCredentialsProvider());
 	
 			Route53Client client= builder.build();

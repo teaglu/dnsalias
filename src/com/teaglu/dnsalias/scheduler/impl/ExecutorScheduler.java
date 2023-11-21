@@ -212,12 +212,21 @@ public class ExecutorScheduler implements Scheduler {
 				}
 			} catch (Exception generalException) {
 				// This shouldn't really happen except for unchecked stuff
-				log.error("Error processing alias", generalException);
+				log.error("Exception processing alias", generalException);
 				
 				alertSinkProxy.sendAlert(
 						AlertCategory.PROCESSING_EXCEPTION,
 						"An exception occurred processing an alias",
 						generalException);
+			} catch (Error error) {
+				// I didn't think I'd run into these, but I got some weird MethodNotDefined
+				// error from the AWS SDK.  It can't hurt to catch everything we can.
+				log.error("Java error processing alias", error);
+				
+				alertSinkProxy.sendAlert(
+						AlertCategory.PROCESSING_EXCEPTION,
+						"A java error occurred processing an alias - check log files",
+						null);
 			}
 
 			// The active flag is synchronized on the alias entry - otherwise there could be
